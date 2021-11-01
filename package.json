@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/newmapsplus/map675-module-02-mup223#readme",
   "dependencies": {
-    "chalk": "^4.1.2"
+    "chalk": "^4.1.2",
+    "csv-parse": "^4.16.3",
+    "csv2geojson": "^5.1.1"
   }
 }
