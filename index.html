@@ -27,13 +27,20 @@
 
   <div id="map"></div>
 
+  <div id="ui">
+    <h3>Austin City Districts</h3>
+    <h4>(number of traffic signals)</h4>
+    <ul id="legend-list"></ul>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
   <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
   <script>
     // map options
     const options = {
-      center: [37.265, -94.04],
-      zoom: 4
+      center: [30.30927, -97.74211],
+      zoom: 10
     }
     // instantiate Leaflet map
     const map = L.map('map', options);
@@ -44,9 +51,37 @@
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy;<a href="https://carto.com/attribution">CARTO</a>'
     }).addTo(map);
 
-    d3.json('data/us-counties.json').then((data) => {
-      L.geoJson(data).addTo(map)
-    });
+    // use D3 fetch to request data with async requests
+    const districtsData = d3.json('data/austin-districts-counts.json');
+    const colorsData = d3.json('data/vividcolors.json');
+    const trafficData = d3.json('data/austin-traffic-signals.json');
+
+    // use Promise to wait until data is all loaded
+    Promise.all([districtsData, colorsData, trafficData]).then(drawMap);
+
+
+    function drawMap(data) {
+      // function is called when Promise is fulfilled and data is ready
+
+      // inspect array of data
+      console.log(data);
+
+      // pull out separate data arrays and assign to variables
+      const districts = data[0];
+      const colors = data[1];
+      const signals = data[2];
+
+      /// create a layerGroup with the geojson data
+      const districtsLayerGroup = L.geoJson(districts, {
+        style: function (feature) {
+          // use the colors object to style each polygon a unique color
+          return {
+            color: colors.Vivid[10][feature.properties.council_di - 1],
+            fillOpacity: .6
+          }
+        }
+      }).addTo(map);
+    }
   </script>
 </body>
 
