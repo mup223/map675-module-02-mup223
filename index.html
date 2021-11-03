@@ -7,6 +7,8 @@
 
   <title>Lesson 02 template</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+  <link rel="stylesheet" href="libs/Leaflet.markercluster/MarkerCluster.Default.css"> />
+  <link rel="stylesheet" href="libs/Leaflet.markercluster/MarkerCluster.css"> />
   <style>
     body {
       font-family: sans-serif;
@@ -67,6 +69,7 @@
   <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
   <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src="libs/Leaflet.markercluster/leaflet.markercluster.js"></script>
   <script>
     // map options
     const options = {
@@ -101,6 +104,25 @@
       const districts = data[0];
       const colors = data[1];
       const signals = data[2];
+
+      // create new markerClusterGroup
+      const markers = L.markerClusterGroup();
+
+      // loop through all our signals features
+      signals.features.forEach(function (feature) {
+        // create a new Leaflet marker for each
+        let coords = feature.geometry.coordinates;
+        let marker = L.marker([coords[1], coords[0]]);
+
+        // bind a tooltip to the marker
+        marker.bindTooltip("Signal ID: " + feature.properties.SIGNAL_ID);
+
+        // add the marker to the markerClusterGroup
+        markers.addLayer(marker);
+
+      });
+      // add the markerClusterGroup to the map
+      map.addLayer(markers);
 
       // store a reference to the HTML list
       const legendList = $('#legend-list');
@@ -159,6 +181,21 @@
         // send this number as an argument to the highlightDistrict function
         highlightDistrict(num);
       });
+
+      $('.legend-item').on('click', (e) => {
+        let distId = e.currentTarget.id.replace('district-', '')
+        console.log(distId)
+        zoomToDistrict(distId)
+      })
+
+      function zoomToDistrict(district) {
+        districtsLayerGroup.eachLayer(function(layer) {
+          // console.log(layer.feature.properties.council_di)
+          if (layer.feature.properties.council_di === district) {
+            map.fitBounds(layer.getBounds())
+          }
+        })
+      }
 
       function highlightDistrict(districtNum) {
         // loop through the districts polygons
